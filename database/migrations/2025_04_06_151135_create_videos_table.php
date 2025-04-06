@@ -17,7 +17,6 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('title');
             $table->text('description');
-            $table->foreignIdFor(Category::class)->onDelete('set null');
             $table->foreignIdFor(User::class)->onDelete('cascade');
             $table->timestamps();
         });

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -49,8 +50,8 @@ class User extends Authenticatable
         ];
     }
 
-    public function videos(): BelongsToMany
+    public function videos(): HasMany
     {
-        return $this->belongsToMany(Video::class);
+        return $this->hasMany(Video::class);
     }
 }

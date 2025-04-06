@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('category_video', function (Blueprint $table) {
             $table->foreignIdFor(Video::class)->cascadeOnDelete();
             $table->foreignIdFor(Category::class)->cascadeOnDelete();
-            $table->primary(['video_id', 'category_id']);
+            $table->primary(['category_id', 'video_id']);
             $table->timestamps();
         });
     }

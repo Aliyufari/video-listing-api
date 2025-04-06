@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -16,8 +17,10 @@ class CategoryFactory extends Factory
      */
     public function definition(): array
     {
+        $names = ['Action Movie', 'Entertainment', 'Cartoons'];
+
         return [
-            //
+            'name' => $this->faker->unique()->randomElement($names)
         ];
     }
 }
