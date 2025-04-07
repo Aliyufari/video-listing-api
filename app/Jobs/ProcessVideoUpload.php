@@ -36,6 +36,9 @@ class ProcessVideoUpload implements ShouldQueue
             unset($this->data['video_file']);
         }
 
+        // Set status to completed
+        $this->data['status'] = 'completed';
+
         $video = Video::create($this->data);
         // Sync category ids if exists
         if (!empty($this->categoryIds)) {

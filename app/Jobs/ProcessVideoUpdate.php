@@ -44,6 +44,9 @@ class ProcessVideoUpdate implements ShouldQueue
             unset($this->data['video_file']);
         }
 
+        // Set status to completed
+        $this->data['status'] = 'completed';
+
         $this->video->update($this->data);
         // Sync category ids if exists
         if (!empty($this->categoryIds)) {

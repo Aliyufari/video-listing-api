@@ -17,7 +17,8 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->text('video_url');
+            $table->string('video_url');
+            $table->string('status')->default('processing');
             $table->foreignIdFor(User::class)->onDelete('cascade');
             $table->timestamps();
         });
