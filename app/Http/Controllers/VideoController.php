@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use Exception;
 use App\Models\Video;
 use App\Traits\ApiResponse;
+use App\Jobs\ProcessVideoUpdate;
+use App\Jobs\ProcessVideoUpload;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Resources\VideoResource;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreVideoRequest;
 use App\Http\Requests\UpdateVideoRequest;
@@ -23,26 +26,25 @@ class VideoController extends Controller
     public function index()
     {
         try {
-            $videos = Video::latest()->paginate(9);
+            $videos = Video::with('categories')->latest()->paginate(9);
 
             $data = [
-                // 'videos' => VideoResource::collection($videos),
-                'data' => $videos,
+                'data' => VideoResource::collection($videos),
                 'links'  => [
                     'current_page' => $videos->currentPage(),
-                    'last_page'    => $videos->lastPage(),
-                    'per_page'     => $videos->perPage(),
-                    'total'        => $videos->total(),
+                    'last_page' => $videos->lastPage(),
+                    'per_page' => $videos->perPage(),
+                    'total' => $videos->total(),
                     'next_page_url' => $videos->nextPageUrl(),
-                    'prev_page_url' => $videos->previousPageUrl(),
-                ],
+                    'prev_page_url' => $videos->previousPageUrl()
+                ]
             ];
 
             return $this->response(
                 true,
                 'Videos fetched successfully',
                 $data,
-                'videos',
+                'videos'
             );
         } catch (Exception $e) {
             Log::error('Error fetching videos: ' . $e->getMessage());
@@ -63,30 +65,23 @@ class VideoController extends Controller
         try {
             $data = $request->validated();
 
-            // Used transaction to rollback if something goes wrong
-            DB::beginTransaction();
-
             if ($request->hasFile('video_file')) {
-                $data['video_url'] = Storage::disk('public')->put('videos', $request->video_file);
+                $data['video_file'] = $request->file('video_file');
             }
 
             // Sample user uuid before implementing auth
             $data['user_id'] = 'RDRT5-HGI09-FFDS6-BRA34';
 
-            $video = Video::create($data);
-            $video->categories()->sync($request->input('category_ids'));
-
-            DB::commit();
+            ProcessVideoUpload::dispatch($data, $data['category_ids']);
 
             return $this->response(
                 true,
-                'Video uploaded successfully',
-                $video,
+                'Video upload initiated successfully',
+                null,
                 'video',
-                Response::HTTP_CREATED
+                Response::HTTP_ACCEPTED
             );
         } catch (Exception $e) {
-            DB::rollBack();
             Log::error('Error uploading video: ' . $e->getMessage());
 
             return $this->response(
@@ -106,8 +101,8 @@ class VideoController extends Controller
             return $this->response(
                 true,
                 'Video fetched successfully',
-                $video,
-                'video',
+                new VideoResource($video->load('categories')),
+                'video'
             );
         } catch (Exception $e) {
             Log::error('Error fetching video: ' . $e->getMessage());
@@ -128,29 +123,20 @@ class VideoController extends Controller
         try {
             $data = $request->validated();
 
-            DB::beginTransaction();
 
             if ($request->hasFile('video_file')) {
-                if ($video->video_url) {
-                    Storage::disk('public')->delete($video->video_url);
-                }
-
-                $data['video_url'] = Storage::disk('public')->put('videos', $request->video_file);
+                $data['video_file'] = $request->file('video_file');
             }
 
-            $video->update($data);
-            $video->categories()->sync($request->input('category_ids'));
-
-            DB::commit();
+            ProcessVideoUpdate::dispatch($video, $data, $data['category_ids']);
 
             return $this->response(
                 true,
                 'Video updated successfully',
-                $video,
+                null,
                 'video',
             );
         } catch (Exception $e) {
-            DB::rollBack();
             Log::error('Error updating video: ' . $e->getMessage());
 
             return $this->response(

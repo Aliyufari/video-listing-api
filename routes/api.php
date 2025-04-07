@@ -1,8 +1,11 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\VideoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/categories', [CategoryController::class, 'index']);
 
 Route::group(['prefix' => 'videos'], function () {
     Route::get('', [VideoController::class, 'index']);
