@@ -20,6 +20,7 @@ class VideoFactory extends Factory
         return [
             'title' => fake()->sentence(),
             'description' => fake()->paragraph(),
+            'video_url' => fake()->url(),
             'user_id' => User::factory(),
         ];
     }

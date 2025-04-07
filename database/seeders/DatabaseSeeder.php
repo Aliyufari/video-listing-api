@@ -21,13 +21,14 @@ class DatabaseSeeder extends Seeder
         $users = User::factory(3)->create();
 
         // Create 5 videos and assign random users & categories
-        Video::factory(5)->create()->each(
-            fn($video) =>
-            $video->update([
-                'user_id' => $users->random()->id,
-            ]) && $video->categories()->attach(
-                $categories->random(rand(1, 3))->pluck('id')
-            )
-        );
+        Video::factory(5)
+            ->recycle($users)
+            ->create()
+            ->each(
+                fn($video) =>
+                $video->categories()->attach(
+                    $categories->random(rand(1, 3))->pluck('id')
+                )
+            );
     }
 }

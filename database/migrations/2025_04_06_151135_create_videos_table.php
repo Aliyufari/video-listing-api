@@ -16,7 +16,8 @@ return new class extends Migration
         Schema::create('videos', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('title');
-            $table->text('description');
+            $table->text('description')->nullable();
+            $table->text('video_url');
             $table->foreignIdFor(User::class)->onDelete('cascade');
             $table->timestamps();
         });
